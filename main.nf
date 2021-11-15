@@ -13,7 +13,7 @@ import java.util.List;
   For exact information refer to documentation.
   Can be substitued with own model folder.
 ---------------------------------------------------*/
-params.modelFolder=""
+params.modelFolder="${baseDir}/DeepVariantModels"
 params.modelName="model.ckpt";
 // params.exome="";
 // if(params.exome){
