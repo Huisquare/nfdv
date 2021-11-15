@@ -339,7 +339,7 @@ process call_variants{
 
   input:
   set file(fasta),file("${fasta}.fai"),file("${fasta}.gz"),file("${fasta}.gz.fai"), file("${fasta}.gz.gzi"),val(bam), file("shardedExamples") from examples
-  file 'dv2/models' from model
+  file (model)
   output:
   set file(fasta),file("${fasta}.fai"),file("${fasta}.gz"),file("${fasta}.gz.fai"), file("${fasta}.gz.gzi"), val(bam), file('call_variants_output.tfrecord') into called_variants
   script:
@@ -347,7 +347,7 @@ process call_variants{
   /opt/deepvariant/bin/call_variants \
     --outfile call_variants_output.tfrecord \
     --examples shardedExamples/examples.tfrecord@${params.j}.gz \
-    --checkpoint dv2/models/${params.modelName} \
+    --checkpoint !{model}/${params.modelName} \
     --num_readers ${params.j}
   """
 }
