@@ -62,15 +62,16 @@ else{
   User can input indexed bam file if they have
   --getBai path_to_bai_folder
 ----------------------------------------------------------------------*/
-
+params.bam_folder = "noBamFolder";
 params.getBai="false";
 
 if(params.test){
     params.bam_folder="$baseDir/testdata"
 }
 
-if ((params.bam_folder != true) && (params.bam_folder != null)){
+if (("noBamFolder").equals(params.bam_folder)){
   System.out.println("please specify the bam folder containing the bam files using --bam_folder \"/path/to/your/bam_folder\" ");
+  System.exit(1);
 }
 
 params.bam_file_prefix="*"
@@ -272,7 +273,7 @@ process call_variants{
 ----------------------------------------------------------------------*/
 
 process postprocess_variants{
-  
+
   tag "$bam"
   cpus params.numCores
 
