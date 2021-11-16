@@ -14,7 +14,7 @@ import java.util.List;
   Can be substitued with own model folder.
 ---------------------------------------------------*/
 params.modelFolder="${baseDir}/DeepVariantModels"
-params.modelName="model.ckpt.data-00000-of-00001";
+params.modelName="model.ckpt";
 params.exome="";
 if(params.exome){
   model=file("s3://deepvariant-data/models/exome");
@@ -339,7 +339,7 @@ process call_variants{
 
   input:
   set file(fasta),file("${fasta}.fai"),file("${fasta}.gz"),file("${fasta}.gz.fai"), file("${fasta}.gz.gzi"),val(bam), file("shardedExamples") from examples
-  file 'model.ckpt' from model
+  file 'dv' from model
   output:
   set file(fasta),file("${fasta}.fai"),file("${fasta}.gz"),file("${fasta}.gz.fai"), file("${fasta}.gz.gzi"), val(bam), file('call_variants_output.tfrecord') into called_variants
   script:
@@ -347,7 +347,7 @@ process call_variants{
   /opt/deepvariant/bin/call_variants \
     --outfile call_variants_output.tfrecord \
     --examples shardedExamples/examples.tfrecord@${params.j}.gz \
-    --checkpoint model.ckpt/${params.modelName} \
+    --checkpoint dv/${params.modelName} \
     --num_readers ${params.j}
   """
 }
