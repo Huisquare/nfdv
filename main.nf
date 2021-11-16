@@ -62,16 +62,14 @@ else{
   User can input indexed bam file if they have
   --getBai path_to_bai_folder
 ----------------------------------------------------------------------*/
-params.bam_folder = "noBamFolder";
+
 params.getBai="false";
 
 if(params.test){
     params.bam_folder="$baseDir/testdata"
 }
-else if (("noBamFolder").equals(params.bam_folder)){
-  System.out.println("please specify the bam folder containing the bam files using --bam_folder \"/path/to/your/bam_folder\" ");
-  System.exit(1);
-}
+
+assert (params.bam_folder != true) && (params.bam_folder != null) : "please specify --bam_folder path/to/bam_folder"
 
 params.bam_file_prefix="*"
 
