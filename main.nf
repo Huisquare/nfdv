@@ -26,12 +26,7 @@ numberShardsMinusOne=params.j-1;
 
 ---------------------------------------------------*/
 
-params.hg19="true";
-params.h38="";
 params.test="";
-params.hg19chr20="";
-params.grch37primary="";
-params.hs37d5="";
 
 params.fasta="nofasta";
 params.fai="nofai";
@@ -148,7 +143,7 @@ process preprocessBAM{
 
 
   tag "${bam[0]}"
-  container 'lifebitai/samtools'
+  container 'huisquare/samtools-config'
   publishDir "$baseDir/sampleDerivatives"
 
   input:
@@ -174,7 +169,7 @@ process preprocessBAM{
 process BAMstats{
 
   tag "${bam[0]}"
-  container 'lifebitai/samtools'
+  container 'huisquare/samtools-config'
 
   input:
   set file(bam), file(bai) from completeStats
