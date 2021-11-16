@@ -68,8 +68,7 @@ params.getBai="false";
 if(params.test){
     params.bam_folder="$baseDir/testdata"
 }
-
-if (("noBamFolder").equals(params.bam_folder)){
+else if (("noBamFolder").equals(params.bam_folder)){
   System.out.println("please specify the bam folder containing the bam files using --bam_folder \"/path/to/your/bam_folder\" ");
   System.exit(1);
 }
