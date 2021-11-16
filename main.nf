@@ -59,8 +59,8 @@ else{
   Compulsory for user to input bam file if not using the testfolder data
   --bam_folder path_to_bam_folder
 
-  User can input indexed bam file if they have
-  --getBai path_to_bai_folder
+  Optional: user can specify if bai file is present in the bam_folder
+  --getBai "true"
 ----------------------------------------------------------------------*/
 
 params.getBai="false";
