@@ -48,12 +48,6 @@ nextflow run main.nf --fasta path/to/fastaFile --bam_folder path/to/bamFolder
 ```
 The h38 version of the reference genome is used.
 Two vcf files are produced and can be found in the folder "results" in the home directory
-    
-## More about the dataset
-We have chosen to look at the HCC1143 cell line, which is a publicly available illumina whole genome sequencing data. The cell line was generated from a 52 year old caucasian woman with breast cancer tumor. Fastq files of both matched normal and tumor were preprocessed, subjected to GATK best practices. The bam files containing the reads for the cancer cell line and the matched normal consists of these 2 bam files. We chose to only look at reads from chromosome 17 as we wanted to start with a smaller dataset to test our pipeline. The genome sequence reads were aligned to the Human GRCh38 reference genome.
-
-## More about Docker Containers 
-To ensure that such tools used in the Nextflow pipeline can run on any machine without running into errors of uninstalled dependencies, Docker containers are used. We are able to encapsulate each process in a Docker container. The configurations needed in the container can be specified in a Docker image, and the image is used like a piece of instruction to build the Docker container. When a process is being run, it would be running in a container, which we can think of as an environment that is specially configured for that process. Therefore, there are no worries about the environment in the deployed machine affecting the execution of each process.
 
 ## More about the pipeline 
 
@@ -124,3 +118,24 @@ By default all the cpus of the machine are used.
 
 The trained model which is used by the **call_variants** process can be changed.
 The default one is the 0.6.0 Version for the whole genome. So if that is what you want to use too, nothing needs to be changed.
+
+## More about the dataset
+We have chosen to look at the HCC1143 cell line, which is a publicly available illumina whole genome sequencing data. The cell line was generated from a 52 year old caucasian woman with breast cancer tumor. Fastq files of both matched normal and tumor were preprocessed, subjected to GATK best practices. The bam files containing the reads for the cancer cell line and the matched normal consists of these 2 bam files. We chose to only look at reads from chromosome 17 as we wanted to start with a smaller dataset to test our pipeline. The genome sequence reads were aligned to the Human GRCh38 reference genome.
+
+## More about Docker Containers 
+To ensure that such tools used in the Nextflow pipeline can run on any machine without running into errors of uninstalled dependencies, Docker containers are used. We are able to encapsulate each process in a Docker container. The configurations needed in the container can be specified in a Docker image, and the image is used like a piece of instruction to build the Docker container. When a process is being run, it would be running in a container, which we can think of as an environment that is specially configured for that process. Therefore, there are no worries about the environment in the deployed machine affecting the execution of each process.
+The Docker files that we wrote for each process can be found in the **Dockerfiles** folder. The images of the Docker files can be found on Dockerhub. 
+[htslib-and-samtools](https://hub.docker.com/repository/docker/huisquare/htslib-and-samtools)
+[samtools-config](https://hub.docker.com/repository/docker/huisquare/samtools-config)
+[vcftools-config](https://hub.docker.com/repository/docker/huisquare/vcftools-config)
+
+
+### Acknowledgements
+We referenced similar pipelines developed by [lifebit.ai] (https://github.com/lifebit-ai/DeepVariant) and [nf-core] (https://github.com/nf-core/deepvariant) when building our pipeline.
+
+We were able to run our pipeline on Google Cloud due to the USD$300 free credits that we received as new users in Google Cloud. 
+
+### Improvements from current similar pipelines
+The DeepVariant model we used is the 1.2.0 version, which is a huge advancement from v0.5.1/v0.6.1 used by [lifebit.ai] (https://github.com/lifebit-ai/DeepVariant) and v1.0.0 used by [nf-core] (https://github.com/nf-core/deepvariant).
+
+The model used is within the DeepVariant docker container, instead of using a model stored on cloud. Our pipeline is therefore more efficient in this aspect as it does not need to download the trained DeepVariant model from cloud storage.
