@@ -1,37 +1,6 @@
-/*
-*  Google DeepVariant as a Nextflow pipeline!
-*
-*  LifeBit Biotech, 2018.
-*
+/*DeepVariant as a Nextflow pipeline
+* for whole genome sequencing data
 */
-
-import java.util.List;
-
-/*--------------------------------------------------
-  Model folder
-  Content: trained model.
-  For exact information refer to documentation.
-  Can be substitued with own model folder.
----------------------------------------------------*/
-params.modelFolder="${baseDir}/DeepVariantModels"
-params.modelName="model.ckpt";
-params.exome="";
-if(params.exome){
-  model=file("s3://deepvariant-data/models/exome");
-}
-else{
-model=file("${params.modelFolder}");
-}
-
-
-/*--------------------------------------------------
-  Using the BED file
----------------------------------------------------*/
-params.bed=""
-if(params.exome){
-  assert (params.bed != true) && (params.bed != null) : "please specify --bed option (--bed bedfile)"
-  bedfile=file("${params.bed}")
-}
 
 /*--------------------------------------------------
   Cores of the machine --> used for process makeExamples
