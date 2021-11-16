@@ -192,18 +192,18 @@ process BAMstats{
   """
 }
 
-
-
 fastaChannel.map{file -> tuple (1,file[0],file[1],file[2],file[3],file[4])}
             .set{all_fa};
 
 completeChannel.map { file -> tuple(1,file[0],file[1]) }
                .set{all_bam};
 
+// below code will create 
+// [[1, ref.fa, ref.fa.fai, ref.fa.gz, ref.fa.gz.gzi, ref.gz.fai], [1, bam_file_0.bam, bam_file_0.bai]]
+// [[1, ref.fa, ref.fa.fai, ref.fa.gz, ref.fa.gz.gzi, ref.gz.fai], [1, bam_file_1.bam, bam_file_1.bai]]
+
 all_fa.cross(all_bam)
       .set{all_fa_bam};
-
-
 
 /*----------------------------------------------------------------------
   process makeExamples
@@ -343,5 +343,9 @@ process multiqc{
 
 
 workflow.onComplete {
-  println ( workflow.success ? "Done! \nYou can find your results in $baseDir/${params.resultdir}" : "Oops .. something went wrong" )
+  if (workflow.success){
+    System.out.println("Congrats! The job was successful. Please find your results in $baseDir/${params.resultdir}");
+  } else {
+    System.out.println("Job was not successful. Please look at the .nextflow.log file for more information on errors.");
+  }
 }
