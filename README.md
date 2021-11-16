@@ -130,12 +130,12 @@ The Docker files that we wrote for each process can be found in the **Dockerfile
 [vcftools-config](https://hub.docker.com/repository/docker/huisquare/vcftools-config)
 
 
-### Acknowledgements
+## Acknowledgements
 We referenced similar pipelines developed by [lifebit.ai] (https://github.com/lifebit-ai/DeepVariant) and [nf-core] (https://github.com/nf-core/deepvariant) when building our pipeline.
 
 We were able to run our pipeline on Google Cloud due to the USD$300 free credits that we received as new users in Google Cloud. 
 
-### Improvements from current similar pipelines
-The DeepVariant model we used is the 1.2.0 version, which is a huge advancement from v0.5.1/v0.6.1 used by [lifebit.ai] (https://github.com/lifebit-ai/DeepVariant) and v1.0.0 used by [nf-core] (https://github.com/nf-core/deepvariant).
+## Improvements from current similar pipelines
+The DeepVariant model we used is the 1.2.0 version, which is a huge advancement from v0.5.1/v0.6.1 used by [lifebit.ai](https://github.com/lifebit-ai/DeepVariant) and v1.0.0 used by [nf-core](https://github.com/nf-core/deepvariant).
 
 The model used is within the DeepVariant docker container, instead of using a model stored on cloud. Our pipeline is therefore more efficient in this aspect as it does not need to download the trained DeepVariant model from cloud storage.
