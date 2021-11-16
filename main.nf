@@ -243,35 +243,7 @@ all_fa.cross(all_bam)
 	( if params.n_shards >= 1 parallelization happens automatically)
       ********************************************************************/
 
-if(params.bed){
-  process makeExamples_with_bed{
-
-      tag "${bam[1]}"
-    cpus params.j
-
-    input:
-      set file(fasta), file(bam) from all_fa_bam
-      file bedfile from bedfile
-    output:
-      set file("${fasta[1]}"),file("${fasta[1]}.fai"),file("${fasta[1]}.gz"),file("${fasta[1]}.gz.fai"), file("${fasta[1]}.gz.gzi"),val("${bam[1]}"), file("shardedExamples") into examples
-    shell:
-    '''
-      mkdir shardedExamples
-      time seq 0 !{numberShardsMinusOne} | \
-      parallel --eta --halt 2 \
-        python /opt/deepvariant/bin/make_examples.zip \
-        --mode calling \
-        --ref !{fasta[1]}.gz\
-        --reads !{bam[1]} \
-        --examples shardedExamples/examples.tfrecord@!{params.j}.gz\
-        --regions !{bedfile} \
-        --task {}
-    '''
-  }
-}
-else{
-  process makeExamples{
-
+process makeExamples{
     tag "${bam[1]}"
     cpus params.j
 
@@ -291,8 +263,8 @@ else{
         --examples shardedExamples/examples.tfrecord@!{params.j}.gz\
         --task {}
     '''
-  }
 }
+
 /********************************************************************
   process call_variants
   Doing the variant calling based on the ML trained model.
