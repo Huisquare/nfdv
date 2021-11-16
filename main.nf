@@ -347,7 +347,7 @@ process call_variants{
   /opt/deepvariant/bin/call_variants \
     --outfile call_variants_output.tfrecord \
     --examples shardedExamples/examples.tfrecord@${params.j}.gz \
-    --checkpoint dv/${params.modelName} \
+    --checkpoint /opt/models/wgs/model.ckpt \
     --num_readers ${params.j}
   """
 }
