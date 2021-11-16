@@ -113,7 +113,7 @@ params.rgsm=20;
 
 process preprocessFASTA{
 
-  container 'lifebitai/preprocessingvctools'
+  container 'huisquare/htslib-and-samtools'
   publishDir "$baseDir/sampleDerivatives"
 
 
