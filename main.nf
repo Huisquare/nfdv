@@ -284,7 +284,7 @@ process postprocess_variants{
 process vcftools{
   tag "$vcf"
 
-  container 'lifebitai/vcftools:latest'
+  container 'huisquare/vcftools-config'
 
   input:
   set val(bam),file(vcf) from postout
@@ -305,7 +305,7 @@ process multiqc{
   tag "multiqc_report.html"
 
   publishDir "${params.resultdir}/MultiQC", mode: 'copy'
-  container 'lifebitai/multiqc:v1.7'
+  container 'ewels/multiqc:latest'
 
   input:
   file(vcfout) from vcfout
