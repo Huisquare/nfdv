@@ -1,30 +1,26 @@
-/*DeepVariant as a Nextflow pipeline
-* for whole genome sequencing data
-*/
+/*----------------------------------------------------------------------
+  DeepVariant as a Nextflow pipeline for whole genome sequencing data
+----------------------------------------------------------------------*/
 
-/*--------------------------------------------------
-  Cores of the machine --> used for process makeExamples
-  default:2
----------------------------------------------------*/
+/*----------------------------------------------------------------------
+  Number of cores to be used for makeExamples
+----------------------------------------------------------------------*/
 int cores = Runtime.getRuntime().availableProcessors();
-params.j=cores
-numberShardsMinusOne=params.j-1;
+params.numCores=cores
+numberShardsMinusOne=params.numCores-1;
 
-/*--------------------------------------------------
-  Fasta related input files
+/*----------------------------------------------------------------------
+  Fasta, indexed fasta and zipped input files
 
-  You can use the flag --hg19 for using the hg19 version of the Genome.
-  You can use the flag --h38 for using the GRCh38.p10 version of the Genome.
+  User can pass in their own fasta file:
+  params.fasta="/my/path/to/file";
 
-  They can be passed manually, through the parameter:
-  	params.fasta="/my/path/to/file";
-  And if already at user's disposal:
+  And the following indexed and zipped files if they have them:
 	params.fai="/my/path/to/file";
 	params.fastagz="/my/path/to/file";
 	params.gzfai="/my/path/to/file";
 	params.gzi="/my/path/to/file";
-
----------------------------------------------------*/
+----------------------------------------------------------------------*/
 
 params.test="";
 
@@ -57,9 +53,15 @@ else{
 
 
 
-/*--------------------------------------------------
-  Bam related input files
----------------------------------------------------*/
+/*----------------------------------------------------------------------
+  Bam and indexed bam input files
+
+  Compulsory for user to input bam file if not using the testfolder data
+  --bam_folder path_to_bam_folder
+
+  User can input indexed bam file if they have
+  --getBai path_to_bai_folder
+----------------------------------------------------------------------*/
 
 params.getBai="false";
 
@@ -79,32 +81,23 @@ if( !("false").equals(params.getBai)){
   Channel.fromPath("${params.bam_folder}/${params.bam_file_prefix}*.bam").map{ file -> tuple(file.name, file) }.set{bamChannel}
 }
 
-/*--------------------------------------------------
+/*----------------------------------------------------------------------
   Output directory
----------------------------------------------------*/
+  Location of all output data
+----------------------------------------------------------------------*/
+
 params.resultdir = "results";
 
-/*--------------------------------------------------
-  Params for the Read Group Line to be added just in
-  case its needed.
-  If not given, default values are used.
----------------------------------------------------*/
-params.rgid=4;
-params.rglb="lib1";
-params.rgpl="illumina";
-params.rgpu="unit1";
-params.rgsm=20;
 
 
-
-/********************************************************************
+/*----------------------------------------------------------------------
   process preprocessFASTA
-  Collects all the files related to the reference genome, like
-  .fai,.gz ...
-  If the user gives them as an input, they are used
-  If not they are produced in this process given only the fasta file.
-********************************************************************/
 
+  generate indexed files and zipped files from the input fasta file
+  if user did not provide them in input
+
+  file types: .fai, .gz, .gz.fai, .gz.gzi
+----------------------------------------------------------------------*/
 
 process preprocessFASTA{
 
@@ -130,14 +123,24 @@ process preprocessFASTA{
 
 }
 
+/*----------------------------------------------------------------------
+  Params for the Read Group Line to be added in case it is needed.
+  If not given, default values are used.
+----------------------------------------------------------------------*/
 
-/********************************************************************
+params.rgid=4;
+params.rglb="lib1";
+params.rgpl="illumina";
+params.rgpu="unit1";
+params.rgsm=20;
+
+
+/*----------------------------------------------------------------------
   process preprocessBAM
-  If the user gives the index files for the bam files as an input, they are used
-  If not they are produced in this process given only the fasta file.
-  Moreover this takes care of the read group line too.
-********************************************************************/
 
+  Produces indexed bam files if user did not provide them
+  This takes care of the read group line too.
+----------------------------------------------------------------------*/
 
 process preprocessBAM{
 
@@ -165,6 +168,11 @@ process preprocessBAM{
   """
 }
 
+/*----------------------------------------------------------------------
+  process BAMstats
+
+  Use samtools to collect statistical information of the alignments
+----------------------------------------------------------------------*/
 
 process BAMstats{
 
@@ -196,17 +204,19 @@ all_fa.cross(all_bam)
 
 
 
-      /********************************************************************
-        process makeExamples
-        Getting bam files and converting them to images ( named examples )
+/*----------------------------------------------------------------------
+  process makeExamples
+
+  Getting bam files and converting them to images (named examples)
 
 	Can be parallelized through the params.n_shards
-	( if params.n_shards >= 1 parallelization happens automatically)
-      ********************************************************************/
+	(if params.n_shards >= 1 parallelization happens automatically)
+----------------------------------------------------------------------*/
 
 process makeExamples{
+
     tag "${bam[1]}"
-    cpus params.j
+    cpus params.numCores
 
     input:
       set file(fasta), file(bam) from all_fa_bam
@@ -221,23 +231,22 @@ process makeExamples{
       --mode calling \
       --ref !{fasta[1]}.gz\
       --reads !{bam[1]} \
-      --examples shardedExamples/examples.tfrecord@!{params.j}.gz\
+      --examples shardedExamples/examples.tfrecord@!{params.numCores}.gz\
       --task {}
     '''
 }
 
-/********************************************************************
+/*----------------------------------------------------------------------
   process call_variants
+
   Doing the variant calling based on the ML trained model.
-********************************************************************/
-
-
+----------------------------------------------------------------------*/
 
 process call_variants{
 
 
   tag "${bam}"
-  cpus params.j
+  cpus params.numCores
 
   input:
   set file(fasta),file("${fasta}.fai"),file("${fasta}.gz"),file("${fasta}.gz.fai"), file("${fasta}.gz.gzi"),val(bam), file("shardedExamples") from examples
@@ -247,24 +256,25 @@ process call_variants{
   """
   /opt/deepvariant/bin/call_variants \
     --outfile call_variants_output.tfrecord \
-    --examples shardedExamples/examples.tfrecord@${params.j}.gz \
+    --examples shardedExamples/examples.tfrecord@${params.numCores}.gz \
     --checkpoint /opt/models/wgs/model.ckpt \
-    --num_readers ${params.j}
+    --num_readers ${params.numCores}
   """
 }
 
 
 
-/********************************************************************
-  process call_variants
-  Trasforming the variant calling output (tfrecord file) into a standard vcf file.
-********************************************************************/
+/*----------------------------------------------------------------------
+  process postprocess_variants
+
+  Transforms the variant calling output (tfrecord file) into a standard 
+  vcf file.
+----------------------------------------------------------------------*/
 
 process postprocess_variants{
-
-
+  
   tag "$bam"
-  cpus params.j
+  cpus params.numCores
 
   publishDir params.resultdir, mode: 'copy'
   input:
@@ -280,6 +290,11 @@ process postprocess_variants{
   """
 }
 
+/*----------------------------------------------------------------------
+  process vcftools
+
+  Use vcftools to collect data on transitions and transversions.
+----------------------------------------------------------------------*/
 
 process vcftools{
   tag "$vcf"
@@ -301,6 +316,12 @@ process vcftools{
   """
 }
 
+/*----------------------------------------------------------------------
+  process multiqc
+
+  Use multiqc to generate a summary report.
+----------------------------------------------------------------------*/
+
 process multiqc{
   tag "multiqc_report.html"
 
@@ -321,5 +342,5 @@ process multiqc{
 
 
 workflow.onComplete {
-    println ( workflow.success ? "Done! \nYou can find your results in $baseDir/${params.resultdir}" : "Oops .. something went wrong" )
+  println ( workflow.success ? "Done! \nYou can find your results in $baseDir/${params.resultdir}" : "Oops .. something went wrong" )
 }
