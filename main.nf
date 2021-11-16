@@ -26,7 +26,7 @@ numberShardsMinusOne=params.j-1;
 
 ---------------------------------------------------*/
 
-// params.test="";
+params.test="";
 
 params.fasta="nofasta";
 params.fai="nofai";
@@ -42,17 +42,16 @@ if(!("nofasta").equals(params.fasta)){
   gzi=file(params.gzi);
 }
 
-// else if(params.test){
-//   fasta=file("$baseDir/testdata/ucsc.hg19.chr20.unittest.fasta");
-//   fai=file("$baseDir/testdata/ucsc.hg19.chr20.unittest.fasta.fai");
-//   fastagz=file("$baseDir/testdata/ucsc.hg19.chr20.unittest.fasta.gz");
-//   gzfai=file("$baseDir/testdata/ucsc.hg19.chr20.unittest.fasta.gz.fai");
-//   gzi=file("$baseDir/testdata/ucsc.hg19.chr20.unittest.fasta.gz.gzi");
-// }
+else if(params.test){
+  fasta=file("$baseDir/testdata/ucsc.hg19.chr20.unittest.fasta");
+  fai=file("$baseDir/testdata/ucsc.hg19.chr20.unittest.fasta.fai");
+  fastagz=file("$baseDir/testdata/ucsc.hg19.chr20.unittest.fasta.gz");
+  gzfai=file("$baseDir/testdata/ucsc.hg19.chr20.unittest.fasta.gz.fai");
+  gzi=file("$baseDir/testdata/ucsc.hg19.chr20.unittest.fasta.gz.gzi");
+}
 
 else{
-  System.out.println(" --fasta \"/path/to/your/genome\"  params is required and was not found! ");
-  System.out.println(" or you can use standard genome versions by typing --hg19 or --h38 ");
+  System.out.println("please input your fasta file using --fasta \"/path/to/your/genome\" ");
   System.exit(0);
 }
 
@@ -68,8 +67,9 @@ if(params.test){
     params.bam_folder="$baseDir/testdata"
 }
 
-assert (params.bam_folder != true) && (params.bam_folder != null) : "please specify --bam_folder option (--bam_folder bamfolder)"
-
+if ((params.bam_folder != true) && (params.bam_folder != null)){
+  System.out.println("please specify the bam folder containing the bam files using --bam_folder \"/path/to/your/bam_folder\" ");
+}
 
 params.bam_file_prefix="*"
 
@@ -152,7 +152,7 @@ process preprocessBAM{
   set file("ready/${bam[0]}"), file("ready/${bam[0]}.bai") into completeChannel, completeStats
   script:
   """
-	  mkdir ready
+	mkdir ready
   [[ `samtools view -H ${bam[0]} | grep '@RG' | wc -l`   > 0 ]] && { mv $bam ready;}|| { picard AddOrReplaceReadGroups \
     I=${bam[0]} \
     O=ready/${bam[0]} \
@@ -214,15 +214,15 @@ process makeExamples{
       set file("${fasta[1]}"),file("${fasta[1]}.fai"),file("${fasta[1]}.gz"),file("${fasta[1]}.gz.fai"), file("${fasta[1]}.gz.gzi"),val("${bam[1]}"), file("shardedExamples") into examples
     shell:
     '''
-      mkdir shardedExamples
-      time seq 0 !{numberShardsMinusOne} | \
-      parallel --eta --halt 2 \
-        python /opt/deepvariant/bin/make_examples.zip \
-        --mode calling \
-        --ref !{fasta[1]}.gz\
-        --reads !{bam[1]} \
-        --examples shardedExamples/examples.tfrecord@!{params.j}.gz\
-        --task {}
+    mkdir shardedExamples
+    time seq 0 !{numberShardsMinusOne} | \
+    parallel --eta --halt 2 \
+      python /opt/deepvariant/bin/make_examples.zip \
+      --mode calling \
+      --ref !{fasta[1]}.gz\
+      --reads !{bam[1]} \
+      --examples shardedExamples/examples.tfrecord@!{params.j}.gz\
+      --task {}
     '''
 }
 
