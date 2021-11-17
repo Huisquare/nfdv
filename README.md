@@ -18,7 +18,7 @@ DeepVariant transforms the task of variant calling, a reconstruction problem in 
 ### “Nextflow: Workflow framework that eases data-intensive computational pipelines” 
 Benefits of Nextflow: 
   Fast prototyping of computational pipeline
-  Support containerisation (e.g. Kubernetes, Docker)
+  Support containerisation using Docker
   Portable
   Parallelisation
   Continuous checkpointing
@@ -35,90 +35,115 @@ The nextflow pipeline aims to automatically handle the creation of some extra ne
 
 ## Dependencies
 
-[Nextflow](https://www.nextflow.io/)
-[Docker](https://www.docker.com/)
+[Nextflow](https://www.nextflow.io/) \
+[Docker](https://www.docker.com/) \
 [Google Cloud](https://cloud.google.com/)
 
-## Quick Start
+## About the pipeline
 
-A typical run on **whole genome data** looks like this: 
+Our pipeline only supports whole genome sequencing data. The workflow **accepts one reference genome and one folder containing multiple BAM files as input**. 
+The parallelisation supported by Nextflow allows the multiple bam files in the input folder to be processed independently and simultaneously during variant calling. Through parallelisation, Nextflow allows the most optimal usage of computational resources by utilising all available CPU cores.
+
+## Using the pipeline
+
+A run on whole genome sequencing data looks like this: 
 ```
 git clone https://github.com/Huisquare/nfdv
 cd nfdv
 nextflow run main.nf --fasta path/to/fastaFile --bam_folder path/to/bamFolder
 ```
-The h38 version of the reference genome is used.
-Two vcf files are produced and can be found in the folder "results" in the home directory
 
-## More about the pipeline 
+## Checking out the pipeline
 
-The workflow **accepts one reference genome and multiple BAM files as input**. The variant calling for the several input BAM files will be processed completely indipendently and will produce indipendent VCF result files. The advantage of this approach is that the variant calling of the different BAM files can be parallelized internally by Nextflow and take advantage of all the cores of the machine in order to get the results at the fastest.
-
-
-## INPUT PARAMETERS
-
-### About preprocessing
-
-DeepVariant, in order to run at its fastest, requires some indexed and compressed versions of both the reference genome and the BAM files. With DeepVariant in Nextflow, if you wish, you can only use as an input the fasta and the BAM file and let us do the work for you in a clean and standarized way (standard tools like [samtools](http://samtools.sourceforge.net/) are used for indexing and every step is run inside of  a Docker container).
-
-<!-- This is how the list of the needed input files looks like. If these are passed all as input parameters, the preprocessing steps will be skipped. 
-```
-NA12878_S1.chr20.10_10p1mb.bam   NA12878_S1.chr20.10_10p1mb.bam.bai	
-ucsc.hg19.chr20.unittest.fasta   ucsc.hg19.chr20.unittest.fasta.fai 
-ucsc.hg19.chr20.unittest.fasta.gz  ucsc.hg19.chr20.unittest.fasta.gz.fai   ucsc.hg19.chr20.unittest.fasta.gz.gzi
-```
-If you do not have all of them, these are the file you can give as input to the Nextflow pipeline, and the rest will be automatically  produced for you .
-```
-NA12878_S1.chr20.10_10p1b.bam  
-ucsc.hg19.chr20.unittest.fasta
-``` -->
-
-### Parameters definition 
-
-- ### BAM FILES 
+If you just want to check out the pipeline, you can run the below code. In this run, the fasta files used are from chr20 from hg19 genome assembly and the bam files used are small bam files for fast processing. 
 
 ```
---bam_folder "/path/to/folder/where/bam/files/are"            REQUIRED
---getBai "true"                                               OPTIONAL  (default: "false")
-```
-In case only some specific files inside the BAM folder should be used as input, a file prefix can be defined by: 
-```
---bam_file_prefix MYPREFIX
+git clone https://github.com/Huisquare/nfdv
+cd nfdv
+nextflow run main.nf --test
 ```
 
-All the BAM files on which the variant calling should be performed should be all stored in the same folder. If you already have the index files (BAI) they should be stored in the same folder and called with the same prefix as the correspoding BAM file ( e.g. file.bam and file.bam.bai ). 
+### Input parameters 
 
-**! TIP** 
+# Reference genome (fasta) input
 
-- ### REFERENCE GENOME
+An input fasta file for the reference genome is required. The path to the fasta file should be specified in the command using:
+```
+--fasta path/to/fastaFile
+```
 
- By default the h38 version of the reference genome is used. 
- 
- Alternatively, a user can use an own reference genome version, by using the following parameters:
+To allow DeepVariant to run faster, it requires some indexed and compressed versions of the reference genome (in fasta) and the alignment files (in bam). There is a preprocessing step in the pipeline to allow for those files to be produced using samtools and bgzip. If both the files are already at your disposal (.fa.fai, .fa.gz, .fa.gz.fai, .fa.gz.gzi for fasta and .bai for bam), you can specify them when running the command. However, they are optional inputs.
 
-  ```
-  --fasta "/path/to/myGenome.fa"                OPTIONAL
-  --fai   "/path/to/myGenome.fa.fai"            OPTIONAL
-  --fastagz "/path/to/myGenome.fa.gz"           OPTIONAL
-  --gzfai  "/path/to/myGenome.fa.gz.fai"         OPTIONAL
-  --gzi  "/path/to/myGenome.fa"                  OPTIONAL
-  ```
-If the optional parameters are not passed, they will be automatically be produced for you and you will be able to find them in the "preprocessingOUTPUT" folder.
+For fasta related optional inputs:
+```
+--fai   "/path/to/myGenome.fa.fai"
+--fastagz "/path/to/myGenome.fa.gz"
+--gzfai  "/path/to/myGenome.fa.gz.fai"
+--gzi  "/path/to/myGenome.fa"
+```
+
+# Alignment file (bam) input 
+
+An input bam folder (containing all the bam files to be processed) is required. The path to the bam folder should be specified in the command using:
+```
+--bam_folder path/to/bamFolder
+```
+
+If the bam_folder specified contain other bam files that are not to be used as input, a file prefix for the bam files to be used can be specified using the below command tag: 
+```
+--bam_file_prefix prefix_of_bam_files
+```
+
+If optional indexed bam inputs for the bam files are present, they must reside in the same input bam folder and have the same prefix as the corresponding bam file that it is indexing. (e.g. file.bam and file.bam.bai):
+```
+--getBai "true"
+```
 
 ### Advanced parameters options
 
 - ### CPUS 
 
+In the pipeline, the makeExamples process is able to be parallelized and the user can define how many CPUs are to be used in this process. By default, **all the CPUs** of the machine are used in the process.
+
 The **make_example** process can be internally parallelized and it can be defined how many cpus should be assigned to this process.
 By default all the cpus of the machine are used.
 
 ```
--- numCores 2          OPTIONAL (default: all)
+-- numCores int_number_of_cpus_to_use
 ```
-- ### MODEL 
 
-The trained model which is used by the **call_variants** process can be changed.
-The default one is the 0.6.0 Version for the whole genome. So if that is what you want to use too, nothing needs to be changed.
+### Google Cloud support
+Firstly, a Google Cloud account is required. Go to [Google Cloud Platform](https://cloud.google.com/gcp) and create an account.
+
+To use Gloogle Cloud to run the code, a `nextflow-service-account` is required. Follow the below steps to create one:
+
+(Adapted from [Google Life Sciences Nextflow Guide](https://cloud.google.com/life-sciences/docs/tutorials/nextflow))
+
+Create a service account using Cloud Console:
+
+In the Cloud Console, go to the Service Accounts page.
+
+[Go to Service Accounts page](https://console.cloud.google.com/projectselector2/iam-admin/serviceaccounts)
+
+Click **Create service account**.
+
+In the **Service account name** field, enter `nextflow-service-account`, and then click **Create**.
+
+In the Grant this service account access to project section, add the following roles from the Select a role drop-down list:
+
+    - Cloud Life Sciences Workflows Runner
+    - Service Account User
+    - Service Usage Consumer
+    - Storage Object Admin
+Click **Continue**, and then click **Done**.
+
+In the [Service Accounts page](https://console.cloud.google.com/projectselector2/iam-admin/serviceaccounts), find the service account you created. In the service account's row, click the More button, and then click Manage keys.
+
+On the Keys page, click Add key, and then click Create new key.
+
+Select JSON for the Key type and click Create.
+
+A JSON file that contains your key downloads to your computer.
 
 ## More about the dataset
 We have chosen to look at the HCC1143 cell line, which is a publicly available illumina whole genome sequencing data. The cell line was generated from a 52 year old caucasian woman with breast cancer tumor. Fastq files of both matched normal and tumor were preprocessed, subjected to GATK best practices. The bam files containing the reads for the cancer cell line and the matched normal consists of these 2 bam files. We chose to only look at reads from chromosome 17 as we wanted to start with a smaller dataset to test our pipeline. The genome sequence reads were aligned to the Human GRCh38 reference genome.
@@ -138,6 +163,6 @@ We referenced similar pipelines developed by [lifebit.ai](https://github.com/lif
 We were able to run our pipeline on Google Cloud due to the USD$300 free credits that we received as new users in Google Cloud. 
 
 ## Improvements from current similar pipelines
-The DeepVariant model we used is the 1.2.0 version, which is a huge advancement from v0.5.1/v0.6.1 used by [lifebit.ai](https://github.com/lifebit-ai/DeepVariant) and v1.0.0 used by [nf-core](https://github.com/nf-core/deepvariant).
+The DeepVariant model we used is the 1.2.0 version, which is a huge advancement from v0.6.1 used by [lifebit.ai](https://github.com/lifebit-ai/DeepVariant) and v1.0 used by [nf-core](https://github.com/nf-core/deepvariant).
 
-The model used is within the DeepVariant docker container, instead of using a model stored on cloud. Our pipeline is therefore more efficient in this aspect as it does not need to download the trained DeepVariant model from cloud storage.
+The model used is enclosed within the DeepVariant docker container, instead of using a model stored on cloud. Our pipeline is therefore more efficient in this aspect as it does not need to download an additional trained DeepVariant model from cloud storage.
