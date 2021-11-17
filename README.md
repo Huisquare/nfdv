@@ -152,14 +152,17 @@ Select **JSON** for the **Key type** and click **Create**.
 
 A JSON file that contains your key downloads to your computer.
 
+### Create a Virtual Machine in Google Cloud
+Please refer to this [link](https://cloud.google.com/compute) for instructions on how to create a virtual machine that is suited to your needs.  
+
 ### Providing credentials to your application
 You can provide authentication credentials to your application code or commands by setting the environment variable `GOOGLE_APPLICATION_CREDENTIALS` to the path of the JSON file that contains your service account key.
 
 The following steps show how to set the `GOOGLE_APPLICATION_CREDENTIALS` environment variable:
 
-1. Open Cloud Shell (or Terminal of Virtual Machine).
+1. Open Terminal of Virtual Machine.
 
-2. From the Cloud Shell More menu, select Upload file, and select the JSON key file you created. The file is uploaded to the home directory of your Cloud Shell instance.
+2. From the **More** menu on the top right corner, select **Upload file**, and select the JSON key file you created. The file is uploaded to the home directory of your Cloud Shell instance.
 
 Confirm that the uploaded file is in your present directory and confirm the filename by running the following command:
 
@@ -203,6 +206,8 @@ sudo apt-get -qq -y install docker-ce
 ```
 
 You have the environment set up to run the pipeline on Google Cloud now!
+Next, please replace the `gls` part in nextflow.config with the matching qualities of your Google virtual machine.
+`git clone` this repository to your terminal and follow the steps to run this pipeline.
 
 ## More about Docker Containers 
 To ensure that such tools used in the Nextflow pipeline can run on any machine without running into errors of uninstalled dependencies, Docker containers are used. We are able to encapsulate each process in a Docker container. The configurations needed in the container can be specified in a Docker image, and the image is used like a piece of instruction to build the Docker container. When a process is being run, it would be running in a container, which we can think of as an environment that is specially configured for that process. Therefore, there are no worries about the environment in the deployed machine affecting the execution of each process.
