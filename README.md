@@ -37,6 +37,7 @@ The nextflow pipeline aims to automatically handle the creation of some extra ne
 
 [Nextflow](https://www.nextflow.io/)
 [Docker](https://www.docker.com/)
+[Google Cloud](https://cloud.google.com/)
 
 ## Quick Start
 
@@ -124,14 +125,15 @@ We have chosen to look at the HCC1143 cell line, which is a publicly available i
 
 ## More about Docker Containers 
 To ensure that such tools used in the Nextflow pipeline can run on any machine without running into errors of uninstalled dependencies, Docker containers are used. We are able to encapsulate each process in a Docker container. The configurations needed in the container can be specified in a Docker image, and the image is used like a piece of instruction to build the Docker container. When a process is being run, it would be running in a container, which we can think of as an environment that is specially configured for that process. Therefore, there are no worries about the environment in the deployed machine affecting the execution of each process.
-The Docker files that we wrote for each process can be found in the **Dockerfiles** folder. The images of the Docker files can be found on Dockerhub. 
-[htslib-and-samtools](https://hub.docker.com/repository/docker/huisquare/htslib-and-samtools)
-[samtools-config](https://hub.docker.com/repository/docker/huisquare/samtools-config)
-[vcftools-config](https://hub.docker.com/repository/docker/huisquare/vcftools-config)
+The Docker files that we wrote for each process can be found in the **Dockerfiles** folder. The images of the Docker files can be found on Dockerhub. \
+Links to Docker images on Dockerhub: \
+[htslib-and-samtools](https://hub.docker.com/repository/docker/huisquare/htslib-and-samtools) \
+[samtools-config](https://hub.docker.com/repository/docker/huisquare/samtools-config) \
+[vcftools-config](https://hub.docker.com/repository/docker/huisquare/vcftools-config) \
 
 
 ## Acknowledgements
-We referenced similar pipelines developed by [lifebit.ai] (https://github.com/lifebit-ai/DeepVariant) and [nf-core] (https://github.com/nf-core/deepvariant) when building our pipeline.
+We referenced similar pipelines developed by [lifebit.ai](https://github.com/lifebit-ai/DeepVariant) and [nf-core](https://github.com/nf-core/deepvariant) when building our pipeline.
 
 We were able to run our pipeline on Google Cloud due to the USD$300 free credits that we received as new users in Google Cloud. 
 
