@@ -1,6 +1,12 @@
 # Incorporating Google's DeepVariant variant caller as a Nextflow pipeline on Google Cloud Platform
 
-A ZB4171 Project, incorporating Google DeepVariant with Nextflow pipeline. 
+A ZB4171 Project, incorporating Google DeepVariant with Nextflow pipeline.  
+
+Group Members:  
+Vanessa Tan Li Xuan  
+Yan Zihao  
+Li Huihui  
+
 ## Our Project 
 1. Incorporating DeepVariant as a Nextflow pipeline
 
