@@ -22,13 +22,13 @@ Li Huihui
 DeepVariant transforms the task of variant calling, a reconstruction problem in genomics, into an image classification problem. It reconstructs the true genome sequence from high throughput sequencer data with significantly greater accuracy than previous classical methods
 
 ### “Nextflow: Workflow framework that eases data-intensive computational pipelines” 
-Benefits of Nextflow: 
-  Fast prototyping of computational pipeline
-  Support containerisation using Docker
-  Portable
-  Parallelisation
-  Continuous checkpointing
-  All the intermediate results produced during the pipeline execution are automatically tracked
+Benefits of Nextflow:  
+- Fast prototyping of computational pipeline  
+- Support containerisation using Docker  
+- Portable  
+- Parallelisation  
+- Continuous checkpointing  
+- All the intermediate results produced during the pipeline execution are automatically tracked  
 
 ### Google Cloud Platform (GCP) 
 Firstly, new customers are offered $300 free credits to run, test and deploy programs on Google Cloud. As DeepVariant is the brainchild of Google Life Sciences, its workflows can be run easily on Google Cloud Platform with optimised configurations. There is also support for running Nextflow pipelines with Google Life Sciences API.
