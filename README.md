@@ -30,8 +30,8 @@ Firstly, new customers are offered $300 free credits to run, test and deploy pro
 ## Motivation
 DeepVariant specifies that it only takes in bam or cram files and its indexed bam file for aligned reads. It requires fasta files and its index file for reference genomes. There is a need to provide input files in such format to run DeepVariant. In addition, when multiple bam files are passed into DeepVariant, it runs them one by one. Also, DeepVariant requires high computing power, therefore running it on local machine may not be an ideal choice.
 
-### Preprocessing & Parallelisation 
-The nextflow pipeline aims to automatically handle the creation of some extra needed index files such as the fai and the bai files, which are needed as inputs for DeepVariant. This files were normally produced by users. The support for Docker in Nextflow allows us to bundle each preprocessing step with an individual Docker container. In addition, incorporating DeepVariant into a Nextflow pipeline allows DeepVariant to leverage on the parallelisation that Nextflow offers. This allows variant calling to be performed at the same time on multiple bam files. Finally, the nextflow pipeline can be deployed onto cloud to use the high computing power offered by cloud computing companies.
+#### Preprocessing & Parallelisation 
+The Nextflow pipeline aims to automatically handle the creation of some extra needed index files such as the fai and the bai files, which are needed as inputs for DeepVariant. This files were normally produced by users. The support for Docker in Nextflow allows us to bundle each preprocessing step with an individual Docker container. In addition, incorporating DeepVariant into a Nextflow pipeline allows DeepVariant to leverage on the parallelisation that Nextflow offers. This allows variant calling to be performed at the same time on multiple bam files. Finally, the nextflow pipeline can be deployed onto cloud to use the high computing power offered by cloud computing companies.
 
 ## Dependencies
 
@@ -101,7 +101,7 @@ If optional indexed bam inputs for the bam files are present, they must reside i
 
 ### Advanced parameters options
 
-- ### CPUS 
+#### Number of CPUs 
 
 In the pipeline, the makeExamples process is able to be parallelized and the user can define how many CPUs are to be used in this process. By default, **all the CPUs** of the machine are used in the process.
 
