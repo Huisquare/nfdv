@@ -63,9 +63,9 @@ cd nfdv
 nextflow run main.nf --test
 ```
 
-### Input parameters 
+## Input parameters 
 
-# Reference genome (fasta) input
+### Reference genome (fasta) input
 
 An input fasta file for the reference genome is required. The path to the fasta file should be specified in the command using:
 ```
@@ -82,7 +82,7 @@ For fasta related optional inputs:
 --gzi  "/path/to/myGenome.fa"
 ```
 
-# Alignment file (bam) input 
+### Alignment file (bam) input 
 
 An input bam folder (containing all the bam files to be processed) is required. The path to the bam folder should be specified in the command using:
 ```
@@ -112,13 +112,14 @@ By default all the cpus of the machine are used.
 -- numCores int_number_of_cpus_to_use
 ```
 
-### Google Cloud support
+## Google Cloud support
 Firstly, a Google Cloud account is required. Go to [Google Cloud Platform](https://cloud.google.com/gcp) and create an account.
 
 To use Gloogle Cloud to run the code, a `nextflow-service-account` is required. Follow the below steps to create one:
 
 (Adapted from [Google Life Sciences Nextflow Guide](https://cloud.google.com/life-sciences/docs/tutorials/nextflow))
 
+### Creating a Service Account
 Create a service account using Cloud Console:
 
 In the Cloud Console, go to the Service Accounts page.
@@ -129,7 +130,7 @@ Click **Create service account**.
 
 In the **Service account name** field, enter `nextflow-service-account`, and then click **Create**.
 
-In the Grant this service account access to project section, add the following roles from the Select a role drop-down list:
+In the **Grant this service account access to project** section, add the following roles from the **Select a role** drop-down list:
 
     - Cloud Life Sciences Workflows Runner
     - Service Account User
@@ -137,16 +138,65 @@ In the Grant this service account access to project section, add the following r
     - Storage Object Admin
 Click **Continue**, and then click **Done**.
 
-In the [Service Accounts page](https://console.cloud.google.com/projectselector2/iam-admin/serviceaccounts), find the service account you created. In the service account's row, click the More button, and then click Manage keys.
+In the [Service Accounts page](https://console.cloud.google.com/projectselector2/iam-admin/serviceaccounts), find the service account you created. In the service account's row, click the **More** (3 dots) button, and then click **Manage keys**.
 
-On the Keys page, click Add key, and then click Create new key.
+On the **Keys** page, click **Add key**, and then click **Create new key**.
 
-Select JSON for the Key type and click Create.
+Select **JSON** for the **Key type** and click **Create**.
 
 A JSON file that contains your key downloads to your computer.
 
-## More about the dataset
-We have chosen to look at the HCC1143 cell line, which is a publicly available illumina whole genome sequencing data. The cell line was generated from a 52 year old caucasian woman with breast cancer tumor. Fastq files of both matched normal and tumor were preprocessed, subjected to GATK best practices. The bam files containing the reads for the cancer cell line and the matched normal consists of these 2 bam files. We chose to only look at reads from chromosome 17 as we wanted to start with a smaller dataset to test our pipeline. The genome sequence reads were aligned to the Human GRCh38 reference genome.
+### Providing credentials to your application
+You can provide authentication credentials to your application code or commands by setting the environment variable `GOOGLE_APPLICATION_CREDENTIALS` to the path of the JSON file that contains your service account key.
+
+The following steps show how to set the `GOOGLE_APPLICATION_CREDENTIALS` environment variable:
+
+1. Open Cloud Shell (or Terminal of Virtual Machine).
+
+2. From the Cloud Shell More menu, select Upload file, and select the JSON key file you created. The file is uploaded to the home directory of your Cloud Shell instance.
+
+Confirm that the uploaded file is in your present directory and confirm the filename by running the following command:
+
+```
+ls
+```
+3. Set the credentials, replacing KEY_FILENAME.json with the name of your key file.
+
+```
+export GOOGLE_APPLICATION_CREDENTIALS=${PWD}/KEY_FILENAME.json
+```
+
+### Installing Nextflow in Cloud Shell or Virtual Machine
+
+Go to the terminal and run:
+
+```
+export NXF_VER=20.10.0
+export NXF_MODE=google
+curl https://get.nextflow.io | bash
+```
+
+### Installing Docker in Cloud Shell or Virtual Machine
+
+Run the following code in the terminal to install Docker: 
+
+```
+sudo apt-get -qq -y install \
+  apt-transport-https \
+  ca-certificates \
+  curl \
+  gnupg-agent \
+  software-properties-common
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+sudo add-apt-repository \
+  "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
+  $(lsb_release -cs) \
+  stable"
+sudo apt-get -qq -y update
+sudo apt-get -qq -y install docker-ce
+```
+
+You have the environment set up to run the pipeline on Google Cloud now!
 
 ## More about Docker Containers 
 To ensure that such tools used in the Nextflow pipeline can run on any machine without running into errors of uninstalled dependencies, Docker containers are used. We are able to encapsulate each process in a Docker container. The configurations needed in the container can be specified in a Docker image, and the image is used like a piece of instruction to build the Docker container. When a process is being run, it would be running in a container, which we can think of as an environment that is specially configured for that process. Therefore, there are no worries about the environment in the deployed machine affecting the execution of each process.
@@ -154,15 +204,15 @@ The Docker files that we wrote for each process can be found in the **Dockerfile
 Links to Docker images on Dockerhub: \
 [htslib-and-samtools](https://hub.docker.com/repository/docker/huisquare/htslib-and-samtools) \
 [samtools-config](https://hub.docker.com/repository/docker/huisquare/samtools-config) \
-[vcftools-config](https://hub.docker.com/repository/docker/huisquare/vcftools-config) \
+[vcftools-config](https://hub.docker.com/repository/docker/huisquare/vcftools-config) 
 
 
-## Acknowledgements
+# Acknowledgements
 We referenced similar pipelines developed by [lifebit.ai](https://github.com/lifebit-ai/DeepVariant) and [nf-core](https://github.com/nf-core/deepvariant) when building our pipeline.
 
 We were able to run our pipeline on Google Cloud due to the USD$300 free credits that we received as new users in Google Cloud. 
 
-## Improvements from current similar pipelines
+# Improvements from current similar pipelines
 The DeepVariant model we used is the 1.2.0 version, which is a huge advancement from v0.6.1 used by [lifebit.ai](https://github.com/lifebit-ai/DeepVariant) and v1.0 used by [nf-core](https://github.com/nf-core/deepvariant).
 
 The model used is enclosed within the DeepVariant docker container, instead of using a model stored on cloud. Our pipeline is therefore more efficient in this aspect as it does not need to download an additional trained DeepVariant model from cloud storage.
