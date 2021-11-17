@@ -6,9 +6,9 @@ A ZB4171 Project, incorporating Google DeepVariant with Nextflow pipeline.
 
 2. Hosting the pipeline on Google Cloud Platform (GCP)
 
-3. Perform pipeline on a breast cancer dataset against clinical studies, and cross validation
-    a. Identify and analyse gene variants from the result
-    b. Supporting evidences for previously identified breast cancer
+3. Perform pipeline on a breast cancer dataset against clinical studies, and cross validation  
+    a. Identify and analyse gene variants from the result  
+    b. Supporting evidences for previously identified breast cancer  
     c. Discover possible new genes associated with breast cancer
 
 ## Introduction 
@@ -206,6 +206,8 @@ Links to Docker images on Dockerhub: \
 [samtools-config](https://hub.docker.com/repository/docker/huisquare/samtools-config) \
 [vcftools-config](https://hub.docker.com/repository/docker/huisquare/vcftools-config) 
 
+## More about the dataset
+We have chosen to look at the HCC1143 cell line, which is a publicly available illumina whole genome sequencing data. The cell line was generated from a 52 year old caucasian woman with breast cancer tumor. Fastq files of both matched normal and tumor were preprocessed, subjected to GATK best practices. The bam files containing the reads for the cancer cell line and the matched normal consists of these 2 bam files. We chose to only look at reads from chromosome 17 as we wanted to start with a smaller dataset to test our pipeline. The genome sequence reads were aligned to the Human GRCh38 reference genome.
 
 ## Acknowledgements
 We referenced similar pipelines developed by [lifebit.ai](https://github.com/lifebit-ai/DeepVariant) and [nf-core](https://github.com/nf-core/deepvariant) when building our pipeline.
