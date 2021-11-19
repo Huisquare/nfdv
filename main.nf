@@ -89,7 +89,7 @@ process preprocessBAM{
   input:
   set val(prefix), file(bam) from bamChannel
   output:
-  set file("final/${bam[0]}"), file("final/${bam[0]}.bai") into completeChannel, completeStats
+  set file("final/${bam[0]}"), file("final/${bam[0]}.bai") into completeChannel
   script:
   """
   mkdir final
@@ -104,26 +104,6 @@ process preprocessBAM{
     RGSM=${params.rgsm};}
     cd final;
     samtools index ${bam[0]};
-  """
-}
-
-
-//  Use samtools to collect statistical information of the alignments
-
-process BAMstats{
-
-  tag "${bam[0]}"
-  container 'huisquare/samtools-config'
-
-  input:
-  set file(bam), file(bai) from completeStats
-  output:
-  file("*") into bam_multiqc
-  script:
-  """
-  samtools stats $bam > stats.txt
-  samtools flagstat $bam > flagstat.txt
-  samtools idxstats $bam > idxstats.txt
   """
 }
 
@@ -211,48 +191,6 @@ process postprocess_variants{
     --ref "${fasta}.gz" \
     --infile call_variants_output.tfrecord \
     --outfile "${bam}.vcf"
-  """
-}
-
-//  Use vcftools to collect data on transitions and transversions.
-
-process vcftools{
-  
-  tag "${vcf}"
-  container 'huisquare/vcftools-config'
-
-  input:
-  set val(bam),file(vcf) from postout
-  output:
-  file("*") into vcfout
-
-  script:
-  """
-  vcftools --vcf $vcf --TsTv-summary
-  vcftools --vcf $vcf --TsTv-by-count
-  vcftools --vcf $vcf --TsTv-by-qual
-  # remove rows containing 'inf' which breaks multiqc report
-  sed -i '/inf/d' out.TsTv.qual
-  """
-}
-
-//  Use multiqc to generate a summary report.
-
-process multiqc{
-  tag "multiqc_report.html"
-
-  publishDir "${params.resultdir}/MultiQC", mode: 'copy'
-  container 'ewels/multiqc:latest'
-
-  input:
-  file(vcfout) from vcfout
-  file(bamout) from bam_multiqc
-  output:
-  file("*") into multiqc
-
-  script:
-  """
-  multiqc . -m vcftools -m samtools
   """
 }
 
