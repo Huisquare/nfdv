@@ -5,29 +5,15 @@
 
 //  Fasta, indexed fasta and zipped input files
 
-params.fasta="nofasta";
+assert (params.fasta != true) && (params.fasta != null) : "please specify --fasta path/to/fasta_file"
 
-if(!("nofasta").equals(params.fasta)){
-  fasta=file(params.fasta)
-}
-
-else{
-  System.out.println("please input your fasta file using --fasta \"/path/to/your/genome\" ");
-  System.exit(1);
-}
-
+fasta=file(params.fasta)
 
 //  Bam and indexed bam input files
 
-params.getBai="false";
-
 assert (params.bam_folder != true) && (params.bam_folder != null) : "please specify --bam_folder path/to/bam_folder"
 
-if( !("false").equals(params.getBai)){
-  Channel.fromFilePairs("${params.bam_folder}/*.{bam,bam.bai}").set{bamChannel}
-}else{
-  Channel.fromPath("${params.bam_folder}/*.bam").map{ file -> tuple(file.name, file) }.set{bamChannel}
-}
+Channel.fromPath("${params.bam_folder}/*.bam").map{ file -> tuple(file.name, file) }.set{bamChannel}
 
 //  output directory
 
