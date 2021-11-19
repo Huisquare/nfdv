@@ -85,11 +85,6 @@ An input bam folder (containing all the bam files to be processed) is required. 
 --bam_folder path/to/bamFolder
 ```
 
-If the bam_folder specified contain other bam files that are not to be used as input, a file prefix for the bam files to be used can be specified using the below command tag: 
-```
---bam_file_prefix prefix_of_bam_files
-```
-
 If optional indexed bam inputs for the bam files are present, they must reside in the same input bam folder and have the same prefix as the corresponding bam file that it is indexing. (e.g. file.bam and file.bam.bai):
 ```
 --getBai "true"
