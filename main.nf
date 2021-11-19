@@ -12,8 +12,6 @@ numberShardsMinusOne=params.numCores-1;
 
 //  Fasta, indexed fasta and zipped input files
 
-params.test="";
-
 params.fasta="nofasta";
 params.fai="nofai";
 params.fastagz="nofastagz";
@@ -28,14 +26,6 @@ if(!("nofasta").equals(params.fasta)){
   gzi=file(params.gzi);
 }
 
-else if(params.test){
-  fasta=file("$baseDir/testdata/ucsc.hg19.chr20.unittest.fasta");
-  fai=file("$baseDir/testdata/ucsc.hg19.chr20.unittest.fasta.fai");
-  fastagz=file("$baseDir/testdata/ucsc.hg19.chr20.unittest.fasta.gz");
-  gzfai=file("$baseDir/testdata/ucsc.hg19.chr20.unittest.fasta.gz.fai");
-  gzi=file("$baseDir/testdata/ucsc.hg19.chr20.unittest.fasta.gz.gzi");
-}
-
 else{
   System.out.println("please input your fasta file using --fasta \"/path/to/your/genome\" ");
   System.exit(1);
@@ -45,10 +35,6 @@ else{
 //  Bam and indexed bam input files
 
 params.getBai="false";
-
-if(params.test){
-    params.bam_folder="$baseDir/testdata"
-}
 
 assert (params.bam_folder != true) && (params.bam_folder != null) : "please specify --bam_folder path/to/bam_folder"
 
