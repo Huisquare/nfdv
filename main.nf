@@ -2,25 +2,15 @@
   DeepVariant as a Nextflow pipeline for whole genome sequencing data
 ----------------------------------------------------------------------*/
 
-/*----------------------------------------------------------------------
-  Number of cores to be used for makeExamples
-----------------------------------------------------------------------*/
+
+//  Number of cores to be used for makeExamples
+
 int cores = Runtime.getRuntime().availableProcessors();
 params.numCores=cores
 numberShardsMinusOne=params.numCores-1;
 
-/*----------------------------------------------------------------------
-  Fasta, indexed fasta and zipped input files
 
-  User can pass in their own fasta file:
-  params.fasta="/my/path/to/file";
-
-  And the following indexed and zipped files if they have them:
-	params.fai="/my/path/to/file";
-	params.fastagz="/my/path/to/file";
-	params.gzfai="/my/path/to/file";
-	params.gzi="/my/path/to/file";
-----------------------------------------------------------------------*/
+//  Fasta, indexed fasta and zipped input files
 
 params.test="";
 
@@ -48,20 +38,11 @@ else if(params.test){
 
 else{
   System.out.println("please input your fasta file using --fasta \"/path/to/your/genome\" ");
-  System.exit(0);
+  System.exit(1);
 }
 
 
-
-/*----------------------------------------------------------------------
-  Bam and indexed bam input files
-
-  Compulsory for user to input bam file if not using the testfolder data
-  --bam_folder path_to_bam_folder
-
-  Optional: user can specify if bai file is present in the bam_folder
-  --getBai "true"
-----------------------------------------------------------------------*/
+//  Bam and indexed bam input files
 
 params.getBai="false";
 
@@ -79,23 +60,13 @@ if( !("false").equals(params.getBai)){
   Channel.fromPath("${params.bam_folder}/${params.bam_file_prefix}*.bam").map{ file -> tuple(file.name, file) }.set{bamChannel}
 }
 
-/*----------------------------------------------------------------------
-  Output directory
-  Location of all output data
-----------------------------------------------------------------------*/
+//  output directory
 
 params.resultdir = "results";
 
 
-
-/*----------------------------------------------------------------------
-  process preprocessFASTA
-
-  generate indexed files and zipped files from the input fasta file
-  if user did not provide them in input
-
-  file types: .fai, .gz, .gz.fai, .gz.gzi
-----------------------------------------------------------------------*/
+//  generate indexed files and zipped files from the input fasta file if user did not provide them in input
+//  file types: .fai, .gz, .gz.fai, .gz.gzi
 
 process preprocessFASTA{
 
@@ -121,10 +92,7 @@ process preprocessFASTA{
 
 }
 
-/*----------------------------------------------------------------------
-  Params for the Read Group Line to be added in case it is needed.
-  If not given, default values are used.
-----------------------------------------------------------------------*/
+//  Params for the Read Group Line to be added in case it is needed.
 
 params.rgid=4;
 params.rglb="lib1";
@@ -133,12 +101,7 @@ params.rgpu="unit1";
 params.rgsm=20;
 
 
-/*----------------------------------------------------------------------
-  process preprocessBAM
-
-  Produces indexed bam files if user did not provide them
-  This takes care of the read group line too.
-----------------------------------------------------------------------*/
+//  Produces indexed bam files if user did not provide them
 
 process preprocessBAM{
 
@@ -166,11 +129,8 @@ process preprocessBAM{
   """
 }
 
-/*----------------------------------------------------------------------
-  process BAMstats
 
-  Use samtools to collect statistical information of the alignments
-----------------------------------------------------------------------*/
+//  Use samtools to collect statistical information of the alignments
 
 process BAMstats{
 
@@ -202,14 +162,8 @@ completeChannel.map { file -> tuple(1,file[0],file[1]) }
 all_fa.cross(all_bam)
       .set{all_fa_bam};
 
-/*----------------------------------------------------------------------
-  process makeExamples
 
-  Getting bam files and converting them to images (named examples)
-
-	Can be parallelized through the params.n_shards
-	(if params.n_shards >= 1 parallelization happens automatically)
-----------------------------------------------------------------------*/
+//  Getting bam files and converting them to images (named examples)
 
 process makeExamples{
 
@@ -234,11 +188,7 @@ process makeExamples{
     '''
 }
 
-/*----------------------------------------------------------------------
-  process call_variants
-
-  Doing the variant calling based on the ML trained model.
-----------------------------------------------------------------------*/
+//  Doing the variant calling based on the ML trained model.
 
 process call_variants{
 
@@ -261,13 +211,7 @@ process call_variants{
 }
 
 
-
-/*----------------------------------------------------------------------
-  process postprocess_variants
-
-  Transforms the variant calling output (tfrecord file) into a standard 
-  vcf file.
-----------------------------------------------------------------------*/
+//  Transforming the variant calling output (tfrecord file) into a standard vcf file.
 
 process postprocess_variants{
 
@@ -288,11 +232,7 @@ process postprocess_variants{
   """
 }
 
-/*----------------------------------------------------------------------
-  process vcftools
-
-  Use vcftools to collect data on transitions and transversions.
-----------------------------------------------------------------------*/
+//  Use vcftools to collect data on transitions and transversions.
 
 process vcftools{
   tag "$vcf"
@@ -314,11 +254,7 @@ process vcftools{
   """
 }
 
-/*----------------------------------------------------------------------
-  process multiqc
-
-  Use multiqc to generate a summary report.
-----------------------------------------------------------------------*/
+//  Use multiqc to generate a summary report.
 
 process multiqc{
   tag "multiqc_report.html"
@@ -338,6 +274,7 @@ process multiqc{
   """
 }
 
+//  completion of workflow
 
 workflow.onComplete {
   if (workflow.success){
