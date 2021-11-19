@@ -59,16 +59,6 @@ cd nfdv
 nextflow run main.nf --fasta path/to/fastaFile --bam_folder path/to/bamFolder
 ```
 
-## Checking out the pipeline
-
-If you just want to check out the pipeline, you can run the below code. In this run, the fasta files used are from chr20 from hg19 genome assembly and the bam files used are small bam files for fast processing. 
-
-```
-git clone https://github.com/Huisquare/nfdv
-cd nfdv
-nextflow run main.nf --test
-```
-
 ## Input parameters 
 
 ### Reference genome (fasta) input
