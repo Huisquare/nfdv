@@ -6,17 +6,9 @@
 //  Fasta, indexed fasta and zipped input files
 
 params.fasta="nofasta";
-params.fai="nofai";
-params.fastagz="nofastagz";
-params.gzfai="nogzfai";
-params.gzi="nogzi";
 
 if(!("nofasta").equals(params.fasta)){
   fasta=file(params.fasta)
-  fai=file(params.fai);
-  fastagz=file(params.fastagz);
-  gzfai=file(params.gzfai);
-  gzi=file(params.gzi);
 }
 
 else{
@@ -42,7 +34,7 @@ if( !("false").equals(params.getBai)){
 params.resultdir = "results";
 
 
-//  generate indexed files and zipped files from the input fasta file if user did not provide them in input
+//  generate indexed files and zipped files from the input fasta file 
 //  file types: .fai, .gz, .gz.fai, .gz.gzi
 
 process preprocessFASTA{
@@ -53,18 +45,15 @@ process preprocessFASTA{
 
   input:
   file fasta from fasta
-  file fai from fai
-  file fastagz from fastagz
-  file gzfai from gzfai
-  file gzi from gzi
+
   output:
   set file(fasta),file("${fasta}.fai"),file("${fasta}.gz"),file("${fasta}.gz.fai"), file("${fasta}.gz.gzi") into fastaChannel
   script:
   """
-  [[ "${params.fai}"=="nofai" ]] &&  samtools faidx $fasta || echo " fai file already present"
-  [[ "${params.fastagz}"=="nofastagz" ]]  && bgzip -c ${fasta} > ${fasta}.gz || echo "fasta.gz file already present"
-  [[ "${params.gzi}"=="nogzi" ]] && bgzip -c -i ${fasta} > ${fasta}.gz || echo "gzi file already present"
-  [[ "${params.gzfai}"=="nogzfai" ]] && samtools faidx "${fasta}.gz" || echo "gz.fai file already present"
+  samtools faidx $fasta ;
+  bgzip -c ${fasta} > ${fasta}.gz ;
+  bgzip -c -i ${fasta} > ${fasta}.gz ;
+  samtools faidx "${fasta}.gz" ;
   """
 
 }
