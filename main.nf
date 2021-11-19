@@ -5,44 +5,22 @@
 
 //  Fasta, indexed fasta and zipped input files
 
-params.fasta="nofasta";
-params.fai="nofai";
-params.fastagz="nofastagz";
-params.gzfai="nogzfai";
-params.gzi="nogzi";
+assert (params.fasta != true) && (params.fasta != null) : "please specify --fasta path/to/fasta_file"
 
-if(!("nofasta").equals(params.fasta)){
-  fasta=file(params.fasta)
-  fai=file(params.fai);
-  fastagz=file(params.fastagz);
-  gzfai=file(params.gzfai);
-  gzi=file(params.gzi);
-}
-
-else{
-  System.out.println("please input your fasta file using --fasta \"/path/to/your/genome\" ");
-  System.exit(1);
-}
-
+fasta=file(params.fasta)
 
 //  Bam and indexed bam input files
 
-params.getBai="false";
-
 assert (params.bam_folder != true) && (params.bam_folder != null) : "please specify --bam_folder path/to/bam_folder"
 
-if( !("false").equals(params.getBai)){
-  Channel.fromFilePairs("${params.bam_folder}/*.{bam,bam.bai}").set{bamChannel}
-}else{
-  Channel.fromPath("${params.bam_folder}/*.bam").map{ file -> tuple(file.name, file) }.set{bamChannel}
-}
+Channel.fromPath("${params.bam_folder}/*.bam").map{ file -> tuple(file.name, file) }.set{bamChannel}
 
 //  output directory
 
 params.resultdir = "results";
 
 
-//  generate indexed files and zipped files from the input fasta file if user did not provide them in input
+//  generate indexed files and zipped files from the input fasta file 
 //  file types: .fai, .gz, .gz.fai, .gz.gzi
 
 process preprocessFASTA{
@@ -53,18 +31,15 @@ process preprocessFASTA{
 
   input:
   file fasta from fasta
-  file fai from fai
-  file fastagz from fastagz
-  file gzfai from gzfai
-  file gzi from gzi
+
   output:
   set file(fasta),file("${fasta}.fai"),file("${fasta}.gz"),file("${fasta}.gz.fai"), file("${fasta}.gz.gzi") into fastaChannel
   script:
   """
-  [[ "${params.fai}"=="nofai" ]] &&  samtools faidx $fasta || echo " fai file already present"
-  [[ "${params.fastagz}"=="nofastagz" ]]  && bgzip -c ${fasta} > ${fasta}.gz || echo "fasta.gz file already present"
-  [[ "${params.gzi}"=="nogzi" ]] && bgzip -c -i ${fasta} > ${fasta}.gz || echo "gzi file already present"
-  [[ "${params.gzfai}"=="nogzfai" ]] && samtools faidx "${fasta}.gz" || echo "gz.fai file already present"
+  samtools faidx $fasta ;
+  bgzip -c ${fasta} > ${fasta}.gz ;
+  bgzip -c -i ${fasta} > ${fasta}.gz ;
+  samtools faidx "${fasta}.gz" ;
   """
 
 }
@@ -89,7 +64,7 @@ process preprocessBAM{
   input:
   set val(prefix), file(bam) from bamChannel
   output:
-  set file("final/${bam[0]}"), file("final/${bam[0]}.bai") into completeChannel, completeStats
+  set file("final/${bam[0]}"), file("final/${bam[0]}.bai") into completeChannel
   script:
   """
   mkdir final
@@ -104,26 +79,6 @@ process preprocessBAM{
     RGSM=${params.rgsm};}
     cd final;
     samtools index ${bam[0]};
-  """
-}
-
-
-//  Use samtools to collect statistical information of the alignments
-
-process BAMstats{
-
-  tag "${bam[0]}"
-  container 'huisquare/samtools-config'
-
-  input:
-  set file(bam), file(bai) from completeStats
-  output:
-  file("*") into bam_multiqc
-  script:
-  """
-  samtools stats $bam > stats.txt
-  samtools flagstat $bam > flagstat.txt
-  samtools idxstats $bam > idxstats.txt
   """
 }
 
@@ -211,48 +166,6 @@ process postprocess_variants{
     --ref "${fasta}.gz" \
     --infile call_variants_output.tfrecord \
     --outfile "${bam}.vcf"
-  """
-}
-
-//  Use vcftools to collect data on transitions and transversions.
-
-process vcftools{
-  
-  tag "${vcf}"
-  container 'huisquare/vcftools-config'
-
-  input:
-  set val(bam),file(vcf) from postout
-  output:
-  file("*") into vcfout
-
-  script:
-  """
-  vcftools --vcf $vcf --TsTv-summary
-  vcftools --vcf $vcf --TsTv-by-count
-  vcftools --vcf $vcf --TsTv-by-qual
-  # remove rows containing 'inf' which breaks multiqc report
-  sed -i '/inf/d' out.TsTv.qual
-  """
-}
-
-//  Use multiqc to generate a summary report.
-
-process multiqc{
-  tag "multiqc_report.html"
-
-  publishDir "${params.resultdir}/MultiQC", mode: 'copy'
-  container 'ewels/multiqc:latest'
-
-  input:
-  file(vcfout) from vcfout
-  file(bamout) from bam_multiqc
-  output:
-  file("*") into multiqc
-
-  script:
-  """
-  multiqc . -m vcftools -m samtools
   """
 }
 
