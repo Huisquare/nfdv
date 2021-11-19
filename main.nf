@@ -83,25 +83,27 @@ params.rgsm=20;
 process preprocessBAM{
 
   tag "${bam[0]}"
-  container 'huisquare/samtools-config'
+  container 'huisquare/samtools-picard-config'
   publishDir "$baseDir/intermediate/preprocessBAM"
 
   input:
   set val(prefix), file(bam) from bamChannel
   output:
-  set file("ready/${bam[0]}"), file("ready/${bam[0]}.bai") into completeChannel, completeStats
+  set file("final/${bam[0]}"), file("final/${bam[0]}.bai") into completeChannel, completeStats
   script:
   """
-	mkdir ready
-  [[ `samtools view -H ${bam[0]} | grep '@RG' | wc -l`   > 0 ]] && { mv $bam ready;}|| { picard AddOrReplaceReadGroups \
+  mkdir final
+  [[ `samtools view -H ${bam[0]} | grep '@RG' | wc -l`   > 0 ]] && { mv $bam final;}|| \
+  { picard AddOrReplaceReadGroups \
     I=${bam[0]} \
-    O=ready/${bam[0]} \
+    O=final/${bam[0]} \
     RGID=${params.rgid} \
     RGLB=${params.rglb} \
     RGPL=${params.rgpl} \
     RGPU=${params.rgpu} \
     RGSM=${params.rgsm};}
-    cd ready ;samtools index ${bam[0]};
+    cd final;
+    samtools index ${bam[0]};
   """
 }
 
