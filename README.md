@@ -200,7 +200,8 @@ The Docker files that we wrote for each process can be found in the **Dockerfile
 Links to Docker images on Dockerhub: \
 [htslib-and-samtools](https://hub.docker.com/repository/docker/huisquare/htslib-and-samtools) \
 [samtools-config](https://hub.docker.com/repository/docker/huisquare/samtools-config) \
-[vcftools-config](https://hub.docker.com/repository/docker/huisquare/vcftools-config) 
+[vcftools-config](https://hub.docker.com/repository/docker/huisquare/vcftools-config) \
+[samtools-and-picard](https://hub.docker.com/repository/docker/huisquare/samtools-picard-config)
 
 ## More about the dataset
 We have chosen to look at the HCC1143 cell line, which is a publicly available illumina whole genome sequencing data. The cell line was generated from a 52 year old caucasian woman with breast cancer tumor. Fastq files of both matched normal and tumor were preprocessed, subjected to GATK best practices. The bam files containing the reads for the cancer cell line and the matched normal consists of these 2 bam files. We chose to only look at reads from chromosome 17 as we wanted to start with a smaller dataset to test our pipeline. The genome sequence reads were aligned to the Human GRCh38 reference genome.
