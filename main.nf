@@ -3,13 +3,6 @@
 ----------------------------------------------------------------------*/
 
 
-//  Number of cores to be used for makeExamples
-
-int cores = Runtime.getRuntime().availableProcessors();
-params.numCores=cores
-numberShardsMinusOne=params.numCores-1;
-
-
 //  Fasta, indexed fasta and zipped input files
 
 params.fasta="nofasta";
@@ -38,12 +31,10 @@ params.getBai="false";
 
 assert (params.bam_folder != true) && (params.bam_folder != null) : "please specify --bam_folder path/to/bam_folder"
 
-params.bam_file_prefix="*"
-
 if( !("false").equals(params.getBai)){
-  Channel.fromFilePairs("${params.bam_folder}/${params.bam_file_prefix}*.{bam,bam.bai}").set{bamChannel}
+  Channel.fromFilePairs("${params.bam_folder}/*.{bam,bam.bai}").set{bamChannel}
 }else{
-  Channel.fromPath("${params.bam_folder}/${params.bam_file_prefix}*.bam").map{ file -> tuple(file.name, file) }.set{bamChannel}
+  Channel.fromPath("${params.bam_folder}/*.bam").map{ file -> tuple(file.name, file) }.set{bamChannel}
 }
 
 //  output directory
@@ -57,7 +48,7 @@ params.resultdir = "results";
 process preprocessFASTA{
 
   container 'huisquare/htslib-and-samtools'
-  publishDir "$baseDir/sampleDerivatives"
+  publishDir "$baseDir/intermediate/preprocessFASTA"
 
 
   input:
@@ -91,10 +82,9 @@ params.rgsm=20;
 
 process preprocessBAM{
 
-
   tag "${bam[0]}"
   container 'huisquare/samtools-config'
-  publishDir "$baseDir/sampleDerivatives"
+  publishDir "$baseDir/intermediate/preprocessBAM"
 
   input:
   set val(prefix), file(bam) from bamChannel
@@ -148,6 +138,11 @@ completeChannel.map { file -> tuple(1,file[0],file[1]) }
 all_fa.cross(all_bam)
       .set{all_fa_bam};
 
+//  Number of cores to be used for makeExamples
+
+int cores = Runtime.getRuntime().availableProcessors();
+params.numCores=cores
+numCoresMinusOne=params.numCores-1;
 
 //  Getting bam files and converting them to images (named examples)
 
@@ -163,7 +158,7 @@ process makeExamples{
     shell:
     '''
     mkdir shardedExamples
-    time seq 0 !{numberShardsMinusOne} | \
+    time seq 0 !{numCoresMinusOne} | \
     parallel --eta --halt 2 \
       python /opt/deepvariant/bin/make_examples.zip \
       --mode calling \
@@ -177,7 +172,6 @@ process makeExamples{
 //  Doing the variant calling based on the ML trained model.
 
 process call_variants{
-
 
   tag "${bam}"
   cpus params.numCores
@@ -201,7 +195,7 @@ process call_variants{
 
 process postprocess_variants{
 
-  tag "$bam"
+  tag "${bam}"
   cpus params.numCores
 
   publishDir params.resultdir, mode: 'copy'
@@ -221,8 +215,8 @@ process postprocess_variants{
 //  Use vcftools to collect data on transitions and transversions.
 
 process vcftools{
-  tag "$vcf"
-
+  
+  tag "${vcf}"
   container 'huisquare/vcftools-config'
 
   input:
