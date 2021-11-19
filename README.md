@@ -68,15 +68,7 @@ An input fasta file for the reference genome is required. The path to the fasta 
 --fasta path/to/fastaFile
 ```
 
-To allow DeepVariant to run faster, it requires some indexed and compressed versions of the reference genome (in fasta) and the alignment files (in bam). There is a preprocessing step in the pipeline to allow for those files to be produced using samtools and bgzip. If both the files are already at your disposal (.fa.fai, .fa.gz, .fa.gz.fai, .fa.gz.gzi for fasta and .bai for bam), you can specify them when running the command. However, they are optional inputs.
-
-For fasta related optional inputs:
-```
---fai   "/path/to/myGenome.fa.fai"
---fastagz "/path/to/myGenome.fa.gz"
---gzfai  "/path/to/myGenome.fa.gz.fai"
---gzi  "/path/to/myGenome.fa"
-```
+To allow DeepVariant to run faster, it requires some indexed and compressed versions of the reference genome (in fasta) and the alignment files (in bam). There is a preprocessing step in the pipeline to allow for those files to be produced using samtools and bgzip. 
 
 ### Alignment file (bam) input 
 
@@ -85,18 +77,13 @@ An input bam folder (containing all the bam files to be processed) is required. 
 --bam_folder path/to/bamFolder
 ```
 
-If optional indexed bam inputs for the bam files are present, they must reside in the same input bam folder and have the same prefix as the corresponding bam file that it is indexing. (e.g. file.bam and file.bam.bai):
-```
---getBai "true"
-```
-
 ### Advanced parameters options
 
 #### Number of CPUs 
 
 In the pipeline, the makeExamples process is able to be parallelized and the user can define how many CPUs are to be used in this process. By default, **all the CPUs** of the machine are used in the process.
 
-The **make_example** process can be internally parallelized and it can be defined how many cpus should be assigned to this process.
+The **makeExamples** process can be internally parallelized and it can be defined how many cpus should be assigned to this process.
 By default all the cpus of the machine are used.
 
 ```
