@@ -186,8 +186,6 @@ To ensure that such tools used in the Nextflow pipeline can run on any machine w
 The Docker files that we wrote for each process can be found in the **Dockerfiles** folder. The images of the Docker files can be found on Dockerhub. \
 Links to Docker images on Dockerhub: \
 [htslib-and-samtools](https://hub.docker.com/repository/docker/huisquare/htslib-and-samtools) \
-[samtools-config](https://hub.docker.com/repository/docker/huisquare/samtools-config) \
-[vcftools-config](https://hub.docker.com/repository/docker/huisquare/vcftools-config) \
 [samtools-and-picard](https://hub.docker.com/repository/docker/huisquare/samtools-picard-config)
 
 ## More about the dataset
